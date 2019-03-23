@@ -1,0 +1,5 @@
+{
+  "emby_server" : "http://localhost:8096",
+  "user_name" : "user",
+  "user_password" : "password"
+}
