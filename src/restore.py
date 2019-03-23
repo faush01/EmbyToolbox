@@ -1,9 +1,18 @@
 
+import sys
 import json
 from emby_client import authenticate, get_ulr_data, set_watched
 from matcher import item_is_match
 
-with open("backup_data.json", 'r') as f:
+if len(sys.argv) == 1:
+    print "Usage:"
+    print "restore.py <backup file>"
+
+backup_file = sys.argv[1]
+
+print "Loading data from : %s" % backup_file
+
+with open(backup_file, 'r') as f:
     backup_data = json.load(f)
 
 config = backup_data["config"]

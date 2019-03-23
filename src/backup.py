@@ -3,13 +3,22 @@
 from emby_client import authenticate
 from emby_client import get_ulr_data
 import json
+import os
 
 with open("config.json", 'r') as f:
     config = json.load(f)
 
-print "Emby Server : %s" % config.get("emby_server")
-print "User Name   : %s" % config.get("user_name")
-print "User Pass   : %s" % config.get("user_password")
+print "Emby Server : %s" % config["emby_server"]
+print "User Name   : %s" % config["user_name"]
+print "User Pass   : %s" % config["user_password"]
+
+try:
+    os.mkdir(config["output_path"])
+except:
+    pass
+
+output_path = os.path.join(config["output_path"], "backup-" + config["user_name"] + ".json")
+print "Backup File : %s" % output_path
 
 user_info = authenticate(config)
 
@@ -46,7 +55,7 @@ for item in item_list:
 
     backup_data["Items"].append(item_data)
 
-with open("backup_data.json", 'w') as f:
+with open(output_path, 'w') as f:
     json.dump(backup_data, f)
 
 print "Backup Saved"

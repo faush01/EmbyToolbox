@@ -1,5 +1,6 @@
 {
   "emby_server" : "http://localhost:8096",
   "user_name" : "user",
-  "user_password" : "password"
+  "user_password" : "password",
+  "output_path": "backup"
 }
