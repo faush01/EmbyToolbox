@@ -1,5 +1,5 @@
 
-external_names = ["IMDb", "TheMovieDb", "Trakt"]
+external_names = ["IMDb", "TheMovieDb", "TheTVDB", "Trakt"]
 
 def item_is_match(item, backup_item):
 
@@ -12,7 +12,7 @@ def item_is_match(item, backup_item):
 
             external_url = extract_url(external_urls, external_name)
             external_url_backup = extract_url(external_urls_backup, external_name)
-            if external_url == external_url_backup:
+            if external_url is not None and external_url_backup is not None and external_url == external_url_backup:
                 external_match = True
                 #print "External Url Matched : " + external_name
                 break

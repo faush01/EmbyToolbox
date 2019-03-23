@@ -58,7 +58,12 @@ for item in item_list:
             set_watched(item_id, played_backup, config, user_info)
 
     else:
-        print "NO matched in backup: %s" % item["Name"]
+        item_details = item["Id"] + " - " + item["Type"]
+        if item["Type"] == "Episode":
+            item_details += " - " + item["SeriesName"] + " - " + str(item["ParentIndexNumber"]) + "x" + str(item["IndexNumber"])
+        item_details += " - " + item["Name"]
+        print "NO matched for item : %s" % item_details
+        #print str(item)
 
     percent_done = int((count / float(total)) * 100)
     percent_disp = percent_done % 5 == 0
@@ -66,5 +71,5 @@ for item in item_list:
 
     if percent_disp and last_percentage != percent_done:
         last_percentage = percent_done
-        print "Processed : %s" % percent_done
+        print "Processed : %s%%" % percent_done
 
