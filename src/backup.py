@@ -39,11 +39,12 @@ backup_data["config"] = config
 backup_data["Items"] = []
 
 for item in item_list:
-    #print str(item)
+    # print str(item)
     item_data = {}
     item_data["Type"] = item["Type"]
     item_data["Played"] = item["UserData"]["Played"]
     item_data["Name"] = item["Name"]
+    item_data["Year"] = item.get("ProductionYear")
 
     if item["Type"] == "Episode":
         item_data["SeriesName"] = item["SeriesName"]
