@@ -1,9 +1,9 @@
 
 
-from emby_client import authenticate
-from emby_client import get_ulr_data
+from emby_client import authenticate, get_ulr_data
 import json
 import os
+
 
 with open("config.json", 'r') as f:
     config = json.load(f)
@@ -37,6 +37,7 @@ item_list = response_data["Items"]
 backup_data = {}
 backup_data["config"] = config
 backup_data["Items"] = []
+inlcude_external_urls = config.get("inlcude_external_urls", False)
 
 for item in item_list:
     # print str(item)
@@ -52,7 +53,8 @@ for item in item_list:
         item_data["EpisodeNumber"] = item["IndexNumber"]
 
     item_data["Path"] = item["Path"]
-    item_data["ExternalUrls"] = item["ExternalUrls"]
+    if inlcude_external_urls:
+        item_data["ExternalUrls"] = item["ExternalUrls"]
 
     backup_data["Items"].append(item_data)
 
