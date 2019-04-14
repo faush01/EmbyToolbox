@@ -1,0 +1,101 @@
+<!doctype html>
+<title>Query Report</title>
+
+<script>
+
+    function build_table(result_data) {
+        var table_html = "";
+
+        var headers = result_data["headers"];
+        table_html += "<tr>";
+        headers.forEach(function(cell) {
+            table_html += "<td>" + cell + "</td>";
+        });
+        table_html += "</tr>";
+
+        var items = result_data["items"];
+        items.forEach(function(element) {
+            table_html += "<tr>";
+            element.forEach(function(cell) {
+                table_html += "<td>" + cell + "</td>";
+            });
+            table_html += "</tr>";
+        });
+
+        //table_html += "<tr><td>TEST</td></tr>";
+
+        return table_html;
+    }
+
+    function send_request() {
+
+        document.getElementById("query_result").innerHTML = "<tr></tr>";
+        var xml_http = new XMLHttpRequest();
+        xml_http.open("POST", "/report", true);
+        xml_http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+        xml_http.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                //alert("RESPONCE: " + this.responseText);
+                var json_data = JSON.parse(this.responseText);
+                if (json_data["error"] != "") {
+                    alert(json_data["error"]);
+                }
+                else {
+                    var table_data = build_table(json_data);
+                    document.getElementById("query_result").innerHTML = table_data;
+                }
+            }
+        };
+
+        var query = document.getElementById("query").value;
+        //alert("QUERY: " + query);
+        json_data = JSON.stringify({ "query": query});
+        xml_http.send(json_data);
+    }
+
+    function load_data() {
+
+        document.getElementById("load_status").innerHTML = "Loading Data";
+        var xml_http = new XMLHttpRequest();
+        xml_http.open("POST", "/load_data", true);
+        xml_http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+        xml_http.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                //alert("RESPONCE: " + this.responseText);
+                var json_data = JSON.parse(this.responseText);
+                document.getElementById("load_status").innerHTML = json_data["message"];
+            }
+        };
+
+        var server_host = document.getElementById("server_host").value;
+        var server_user = document.getElementById("server_user").value;
+        var server_password = document.getElementById("server_password").value;
+
+        json_data = JSON.stringify({ "server_host": server_host, "server_user": server_user, "server_password": server_password});
+        //alert("QUERY: " + json_data);
+        xml_http.send(json_data);
+    }
+
+</script>
+
+<h4>Server</h4>
+<table>
+    <tr><td>Server</td><td><input type="text" id="server_host" /></td></tr>
+    <tr><td>User</td><td><input type="text" id="server_user"/></td></tr>
+    <tr><td>Password</td><td><input type="text" id="server_password"/></td></tr>
+</table>
+    <input type="button" onClick="load_data()" value="Load Data" />
+    <p id="load_status"></p>
+
+<h4>Query</h4>
+
+<textarea id="query" rows="4" cols="50"></textarea><br>
+<input type="button" onClick="send_request()" value="Send Query" />
+
+<h4>Results</h4>
+
+<table id="query_result">
+
+</table>
