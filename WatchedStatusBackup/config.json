@@ -1,7 +1,4 @@
 {
   "emby_server" : "http://localhost:8096",
-  "user_name" : "user",
-  "user_password" : "password",
-  "output_path": "backup",
-  "inlcude_external_urls": false
+  "api_key" : "<api key goes here>"
 }
