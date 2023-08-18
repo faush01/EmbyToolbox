@@ -1,75 +1,42 @@
-
-import sys
+import os
 import json
-from emby_client import authenticate, get_ulr_data, set_watched
-from matcher import item_is_match
+from emby_client import check_server, get_user_list, get_user_items, set_watched
 
-if len(sys.argv) == 1:
-    print "Usage:"
-    print "restore.py <backup file>"
 
-backup_file = sys.argv[1]
+with open("config.json", 'r') as f:
+    config = json.load(f)
 
-print "Loading data from : %s" % backup_file
+print ("Emby Server           : %s" % config["emby_server"])
+print ("ApiKey                : %s" % config["api_key"])
+print ("Backup Path           : %s" % config["output_path"])
 
-with open(backup_file, 'r') as f:
-    backup_data = json.load(f)
+check_server(config)
+user_list = get_user_list(config)
 
-config = backup_data["config"]
+for user in user_list:
+    print(user["Name"])
+    backup_path = os.path.join(config["output_path"], "watched-" + user["Name"] + ".txt")
 
-print "Emby Server : %s" % config.get("emby_server")
-print "User Name   : %s" % config.get("user_name")
-print "User Pass   : %s" % config.get("user_password")
-
-user_info = authenticate(config)
-
-print "AccessToken Token : %s" % user_info["AccessToken"]
-
-url = ('{server}/emby/Users/{userid}/Items' +
-       '?Recursive=true' +
-       '&Fields=Path,ExternalUrls' +
-       '&IsMissing=False'
-       '&IncludeItemTypes=Movie,Episode' +
-       '&ImageTypeLimit=0')
-
-response_data = get_ulr_data(url, config, user_info)
-
-item_list = response_data["Items"]
-backup_items = backup_data["Items"]
-count = 1
-total = len(item_list)
-last_percentage = 0
-
-for item in item_list:
-
-    item_found = None
-    for backup_item in backup_items:
-        if item_is_match(item, backup_item):
-            item_found = backup_item
-            break
-
-    if item_found:
-        played_current = item["UserData"]["Played"]
-        played_backup = item_found["Played"]
-        if played_current != played_backup:
-            print "Setting played status : %s - %s" % (item["Id"], item["Name"])
-
-            item_id = item["Id"]
-            set_watched(item_id, played_backup, config, user_info)
-
-    else:
-        item_details = item["Id"] + " - " + item["Type"]
-        if item["Type"] == "Episode":
-            item_details += " - " + item["SeriesName"] + " - " + str(item["ParentIndexNumber"]) + "x" + str(item["IndexNumber"])
-        item_details += " - " + item["Name"]
-        print "NO matched for item : %s" % item_details
-        #print str(item)
-
-    percent_done = int((count / float(total)) * 100)
-    percent_disp = percent_done % 5 == 0
-    count += 1
-
-    if percent_disp and last_percentage != percent_done:
-        last_percentage = percent_done
-        print "Processed : %s%%" % percent_done
-
+    if not os.path.exists(backup_path):
+        print("No backup data for : %s" % user["Name"])
+        continue
+    watched_items = []
+    with open(backup_path, 'r') as f:
+        for line in f:
+            watched_items.append(line.rstrip())
+    user_items = get_user_items(config, user["Id"])
+    #print(user_items)
+    count = 0
+    total = float(len(watched_items))
+    last_percentage = -1
+    for item_key in watched_items:
+        if item_key in user_items:
+            item_id = user_items[item_key]
+            set_watched(config, user["Id"], item_id)
+        percent_done = int((count / total) * 100)
+        count += 1
+        percent_disp = percent_done % 5 == 0
+        if percent_disp and last_percentage != percent_done:
+            last_percentage = percent_done
+            print("Processed : %s%%" % percent_done)
+    print("Processed : %s%%" % 100)
