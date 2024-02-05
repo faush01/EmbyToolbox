@@ -1,9 +1,10 @@
 ## Item Updater
 
-Emby plugin to facilitate updates to a single emby library item.  
-Currently only supports ComunityRating
+Emby plugin to facilitate updates to a single Emby library item.  
+The plugin creates a new API endpoint (Admin Only) that can be used to update items details.  
+Currently, only supports CommunityRating  
 
-## API Example:  
+### API Example:  
 
 Python:  
 
