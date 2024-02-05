@@ -3,7 +3,7 @@
 Emby plugin to facilitate updates to a single emby library item.  
 Currently only supports ComunityRating
 
-###POST Example:  
+## API Example:  
 
 Python:  
 
