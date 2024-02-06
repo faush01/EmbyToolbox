@@ -2,6 +2,7 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 import os
+import time
 from extract_details import extract_rating_details, get_imdb_rating_url
 from store_details import check_exists, load_imdb_ids, sqlite_create_store_table, sqlite_save_details, sqlite_store_stats, sqlite_clean_store_table
 #warnings.filterwarnings("ignore")
@@ -13,6 +14,8 @@ from store_details import check_exists, load_imdb_ids, sqlite_create_store_table
 
 sqlite_store = "imdb_ratings.db"
 sqlite_create_store_table(sqlite_store)
+sqlite_store_stats(sqlite_store)
+time.sleep(5)
 
 opts = Options()
 #opts.headless = True
@@ -30,7 +33,7 @@ removed = 0#sqlite_clean_store_table(sqlite_store, imdb_ids)
 failed_count = 0
 total_processed = 0
 total_skipped = 0
-max_process = 50
+max_process = 1000
 rate_limit = 6 # limit to a request every X sec
 
 for index, imdb_id_item in enumerate(imdb_ids):

@@ -1,15 +1,20 @@
 import requests
 import os
+import time
+
 
 emby_url = os.environ.get('emby_url')
 api_key = os.environ.get('api_key')
 url = emby_url
 url += "/emby/Items"
 url += "?Recursive=True"
-url += "&IncludeItemTypes=Movie" # Movie,Episode
+url += "&IncludeItemTypes=Movie,Episode" # Movie,Episode
 url += "&Fields=ProviderIds,PremiereDate"
 url += "&ImageTypeLimit=0"
 url += "&api_key=" + api_key
+
+print("URL: %s" % url)
+time.sleep(5)
 
 result = requests.get(url)
 items = result.json()["Items"]
