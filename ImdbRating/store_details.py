@@ -8,11 +8,11 @@ def check_exists(imdb_id, item_prem_date, sqlite_store):
     #output_path = base_path + imdb_id + ".json"
 
     max_update_age = 60*60*24*30 # 30 days
-    prem_date_windw = 60*60*24*14 # 14 days
+    prem_date_window = 60*60*24*30 # 30 days
 
     prem_date = datetime.strptime(item_prem_date, "%Y-%m-%d")
     diff = datetime.now() - prem_date
-    if diff.total_seconds() < prem_date_windw:
+    if diff.total_seconds() < prem_date_window:
         print("\tToo recent, since prem : %s" % (diff))
         return False
 

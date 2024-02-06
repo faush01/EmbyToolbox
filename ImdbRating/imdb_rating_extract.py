@@ -51,7 +51,7 @@ for index, imdb_id_item in enumerate(imdb_ids):
             print(e)
             rating_details = None
             failed_count += 1
-            if failed_count > 5:
+            if failed_count > 20:
                 print(f"\tToo many failed attempts, exiting")
                 break
             continue

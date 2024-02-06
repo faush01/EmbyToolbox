@@ -1,5 +1,6 @@
 import requests
 import os
+import time
 
 
 def emby_get_items():
@@ -9,10 +10,13 @@ def emby_get_items():
     url = emby_url
     url += "/emby/Items"
     url += "?Recursive=True"
-    url += "&IncludeItemTypes=Movie" # Movie,Episode
+    url += "&IncludeItemTypes=Movie,Episode" # Movie,Episode
     url += "&Fields=ProviderIds,PremiereDate,CommunityRating"
     url += "&ImageTypeLimit=0"
     url += "&api_key=" + api_key
+
+    print("Emby URL : %s" % url)
+    time.sleep(5)
 
     result = requests.get(url)
     items = result.json()["Items"]
