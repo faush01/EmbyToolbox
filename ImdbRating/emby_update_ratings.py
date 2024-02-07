@@ -16,6 +16,8 @@ for item in items:
     name = item["Name"]
     emby_id = item["Id"]
     type = item["Type"]
+    if type == "Episode":
+        name = ("%s - %s - S%sE%s" % (item["SeriesName"], name, item["ParentIndexNumber"], item["IndexNumber"]))
     prem_date = item.get("PremiereDate", "1900-01-01")
     prem_date = prem_date.split("T")[0]    
     community_rating = item.get("CommunityRating", 0)
