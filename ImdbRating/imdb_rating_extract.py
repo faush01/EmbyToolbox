@@ -33,7 +33,7 @@ removed = 0#sqlite_clean_store_table(sqlite_store, imdb_ids)
 failed_count = 0
 total_processed = 0
 total_skipped = 0
-max_process = 1000
+max_process = 500
 rate_limit = 6 # limit to a request every X sec
 
 for index, imdb_id_item in enumerate(imdb_ids):
