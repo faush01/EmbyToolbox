@@ -12,6 +12,8 @@ def emby_get_items():
     url += "?Recursive=True"
     url += "&IncludeItemTypes=Movie,Episode" # Movie,Episode
     url += "&Fields=ProviderIds,PremiereDate,CommunityRating"
+    url += "&SortBy=PremiereDate"
+    url += "&SortOrder=Descending"
     url += "&ImageTypeLimit=0"
     url += "&api_key=" + api_key
 
