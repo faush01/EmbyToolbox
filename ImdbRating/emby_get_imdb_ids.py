@@ -6,6 +6,7 @@ from emby_actions import emby_get_items
 
 items = emby_get_items()
 prem_date_window = 60*60*24*30 # 30 days
+count = 0
 
 with open("imdb_ids.csv", "w") as file:
     for item in items:
@@ -22,4 +23,6 @@ with open("imdb_ids.csv", "w") as file:
                 #print("Name : %s (%s)" %(name, imdb_id))
                 line = "%s,%s\n" % (imdb_id, prem_date)
                 file.write(line)
-    
+                count += 1
+
+print("Emby item count : %s" % (count))
