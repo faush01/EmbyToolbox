@@ -18,7 +18,8 @@ sqlite_store_stats(sqlite_store)
 time.sleep(5)
 
 opts = Options()
-#opts.headless = True
+opts.set_preference("permissions.default.stylesheet", 2)
+opts.set_preference("permissions.default.image", 2)
 opts.add_argument("-headless")
 firefox_driver = webdriver.Firefox(options=opts)
 
