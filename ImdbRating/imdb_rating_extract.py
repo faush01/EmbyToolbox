@@ -3,10 +3,14 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 import os
 import time
+import sys
 from extract_details import extract_rating_details, get_imdb_rating_url
 from store_details import check_exists, load_imdb_ids, sqlite_create_store_table, sqlite_save_details, sqlite_store_stats, sqlite_clean_store_table
 #warnings.filterwarnings("ignore")
 
+#sys.stdin.reconfigure(encoding='utf-8')
+#sys.stdout.reconfigure(encoding='utf-8')
+#sys.stderr.reconfigure(encoding='utf-8')
 
 #store_path = "C:\\Temp\\selenium_test\\store\\"
 #if not os.path.exists(store_path):
@@ -58,7 +62,7 @@ for index, imdb_id_item in enumerate(imdb_ids):
             continue
 
         rating_details["imdb_id"] = imdb_id
-        print(f"\tSaving : %s (%s)" % (imdb_id, rating_details["title"]))
+        print("\tSaving : %s (%s)" % (imdb_id, rating_details["title"]), flush=True)
         #save_details(rating_details, store_path)
         sqlite_save_details(sqlite_store, rating_details)
         #print(rating_details)
@@ -67,7 +71,7 @@ for index, imdb_id_item in enumerate(imdb_ids):
             break
     else:
         total_skipped += 1
-        print(f"\tSkipping : %s" % (imdb_id))
+        print(f"\tSkipping : %s" % (imdb_id), flush=True)
 
 firefox_driver.quit()
 
