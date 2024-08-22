@@ -4,16 +4,18 @@ from contextlib import closing
 from datetime import datetime
 
 
-def check_exists(imdb_id, item_prem_date, sqlite_store):
-    #output_path = base_path + imdb_id + ".json"
+num_days = 120
+max_age_days = 30
 
-    max_update_age = 60*60*24*30 # 30 days
-    prem_date_window = 60*60*24*30 # 30 days
+def check_exists(imdb_id, item_prem_date, sqlite_store):
+
+    max_update_age = 60 * 60 * 24 * max_age_days
+    prem_date_window = 60 * 60 * 24 * num_days
 
     prem_date = datetime.strptime(item_prem_date, "%Y-%m-%d")
     diff = datetime.now() - prem_date
     if diff.total_seconds() < prem_date_window:
-        print("\tToo recent, since prem : %s" % (diff))
+        print("\tItem premiered recently, so updating : %s" % (diff))
         return False
 
     # load from DB if available
