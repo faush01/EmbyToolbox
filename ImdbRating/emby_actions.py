@@ -26,7 +26,7 @@ def emby_get_items():
     return items
 
 
-def emby_update_items(new_ratings):
+def emby_update_items(update_data):
 
     emby_url = os.environ.get('emby_url')
     api_key = os.environ.get('api_key')
@@ -34,24 +34,18 @@ def emby_update_items(new_ratings):
 
     '''
     update_data = {
-        "UpdateActions": [
+        "2111" : [
             {
-                "Id": 4450,
                 "Type": "CommunityRating",
-                "Value": "3.32"
+                "Value": "6.1"
             },
             {
-                "Id": 4449,
-                "Type": "CommunityRating",
-                "Value": "4.43"
+                "Type": "LockField",
+                "Value": "CommunityRating"
             }
         ]
     }
     '''
-
-    update_data = {
-        "UpdateActions": new_ratings
-    }
 
     result = requests.post(url, json=update_data)
     print(result.status_code)

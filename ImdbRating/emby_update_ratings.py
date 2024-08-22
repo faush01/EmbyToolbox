@@ -4,13 +4,15 @@ from emby_actions import emby_get_items, emby_update_items
 from store_details import sqlite_create_store_table, sqlite_load_rating_details
 
 
+num_days = 120
+
 sqlite_store = "imdb_ratings.db"
 sqlite_create_store_table(sqlite_store)
 
 items = emby_get_items()
-prem_date_window = 60*60*24*30 # 30 days
+prem_date_window = 60 * 60 * 24 * num_days
 
-changed_items = []
+changed_items = {}
 for item in items:
     #print(item)
     name = item["Name"]
@@ -32,7 +34,7 @@ for item in items:
                 store_imdb_rating = float(rating_details["rating"])
                 if store_imdb_rating != community_rating:
                     print("Ratings dont match : %s (%s -> %s) - %s" % (imdb_id, community_rating, store_imdb_rating, name))
-                    changed_items.append({"Id": emby_id, "Type": "CommunityRating", "Value": store_imdb_rating})
+                    changed_items[emby_id] = [{"Type": "CommunityRating", "Value": store_imdb_rating}]
                 #else:
                     #print("Ratings match : %s (%s)" % (imdb_id, community_rating))
             else:
@@ -40,6 +42,7 @@ for item in items:
         else:
             print("Emby item has no Imdb : (%s) %s" % (emby_id, name))
 
+#print(changed_items)
 changed_count = len(changed_items)
 print("Change item count : %s" % (changed_count,))
 if(changed_count > 0):

@@ -125,3 +125,26 @@ def sqlite_clean_store_table(store_file, imdb_ids_list):
             conn.commit()
     return removed
 
+
+def sqlite_delete_rating_details(store_file, imdb_id_list):
+    del_count = 0
+    with closing(sqlite3.connect(store_file)) as conn:
+        with closing(conn.cursor()) as cursor:
+            for imdb_id in imdb_id_list:
+                imdb_id = imdb_id.strip()
+                print("Removing %s from store" % (imdb_id,))
+                count = cursor.execute("DELETE FROM imdb_ratings WHERE imdb_id = ?", (imdb_id,))
+                del_count += count.rowcount
+            conn.commit()
+    return del_count
+
+def sqlite_list_all(store_file):
+    imdb_id_list = []
+    with closing(sqlite3.connect(store_file)) as conn:
+        with closing(conn.cursor()) as cursor:
+            cursor.execute("SELECT imdb_id FROM imdb_ratings")
+            row = cursor.fetchone()
+            while row is not None:
+                imdb_id_list.append(row[0])
+                row = cursor.fetchone()
+    return imdb_id_list
