@@ -45,13 +45,21 @@ def save_details(rating_details, base_path):
         file.write(json.dumps(rating_details, indent=4))
 
 
-def load_imdb_ids(imdb_file):
-    imdb_ids = {}
-    with open(imdb_file, "r") as file:
+def load_emby_items(item_file):
+    emby_items = []
+    with open(item_file, "r") as file:
         for line in file:
-            line_tokens = line.strip().split(",")
-            imdb_ids[line_tokens[0]] = line_tokens[1]
-    return imdb_ids
+            line_tokens = line.strip().split("\t")
+            emby_item_data = {
+                "emby_id": line_tokens[0],
+                "imdb_id": line_tokens[1],
+                "prem_date": line_tokens[2],
+                "type": line_tokens[3],
+                "rating": line_tokens[4],
+                "name": line_tokens[5]
+            }
+            emby_items.append(emby_item_data)
+    return emby_items
 
 
 def sqlite_create_store_table(store_file):

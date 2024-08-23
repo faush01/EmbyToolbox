@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 from emby_actions import emby_get_items, emby_update_items
-from store_details import sqlite_create_store_table, sqlite_load_rating_details
+from store_details import sqlite_create_store_table, sqlite_load_rating_details, load_emby_items
 
 
 num_days = 120
@@ -9,38 +9,36 @@ num_days = 120
 sqlite_store = "imdb_ratings.db"
 sqlite_create_store_table(sqlite_store)
 
-items = emby_get_items()
+emby_items = load_emby_items("emby_items.tsv")
+
 prem_date_window = 60 * 60 * 24 * num_days
 
 changed_items = {}
-for item in items:
+for item in emby_items:
+
     #print(item)
-    name = item["Name"]
-    emby_id = item["Id"]
-    type = item["Type"]
-    if type == "Episode":
-        name = ("%s - %s - S%sE%s" % (item["SeriesName"], name, item["ParentIndexNumber"], item["IndexNumber"]))
-    prem_date = item.get("PremiereDate", "1900-01-01")
-    prem_date = prem_date.split("T")[0]    
-    community_rating = item.get("CommunityRating", 0)
+    name = item["name"]
+    emby_id = item["emby_id"]
+    type = item["type"]
+    prem_date = item["prem_date"]
+    community_rating = item["rating"]
     prem_date_obj = datetime.strptime(prem_date, "%Y-%m-%d")
     diff = datetime.now() - prem_date_obj
-    imdb_id = item["ProviderIds"].get("Imdb", None)
-    if not imdb_id: imdb_id = item["ProviderIds"].get("IMDB", None)
+    imdb_id = item["imdb_id"]
+
     if type == "Movie" or diff.total_seconds() < prem_date_window:
-        if imdb_id:
-            rating_details = sqlite_load_rating_details(sqlite_store, imdb_id)
-            if rating_details is not None:
-                store_imdb_rating = float(rating_details["rating"])
-                if store_imdb_rating != community_rating:
-                    print("Ratings dont match : %s (%s -> %s) - %s" % (imdb_id, community_rating, store_imdb_rating, name))
-                    changed_items[emby_id] = [{"Type": "CommunityRating", "Value": store_imdb_rating}]
-                #else:
-                    #print("Ratings match : %s (%s)" % (imdb_id, community_rating))
-            else:
-                print("Not found in store : %s - %s" % (imdb_id, name))
+        rating_details = sqlite_load_rating_details(sqlite_store, imdb_id)
+        if rating_details is not None:
+            store_imdb_rating = float(rating_details["rating"])
+            emby_rating = float(community_rating)
+            rating_diff = int(store_imdb_rating * 10) - int(emby_rating * 10)
+            if rating_diff != 0:
+                print("Ratings dont match : %s (%s -> %s) - %s" % (imdb_id, community_rating, store_imdb_rating, name))
+                changed_items[emby_id] = [{"Type": "CommunityRating", "Value": store_imdb_rating}]
+            #else:
+                #print("Ratings match : %s (%s)" % (imdb_id, community_rating))
         else:
-            print("Emby item has no Imdb : (%s) %s" % (emby_id, name))
+            print("Not found in store : %s - %s" % (imdb_id, name))
 
 #print(changed_items)
 changed_count = len(changed_items)

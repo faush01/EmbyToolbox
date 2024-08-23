@@ -27,12 +27,13 @@ def get_imdb_rating_url(imdb_id):
     return f"https://www.imdb.com/title/{imdb_id}/ratings/"
 
 
-def extract_rating_details(browser_driver, url, rate_limit=0):
+def extract_rating_details(browser_driver, url):
+    timming_data = {}
     start = time.perf_counter()
     browser_driver.get(url)
 
     toc = time.perf_counter()
-    print(f"\tGet url {toc - start:0.4f} seconds")
+    timming_data["get_url"] = toc - start
 
     # wait for user rating list svg image to be built
     wait = WebDriverWait(browser_driver, 15)
@@ -40,8 +41,8 @@ def extract_rating_details(browser_driver, url, rate_limit=0):
     wait.until(wait_event)
 
     toc = time.perf_counter()
-    print(f"\tWait for page {toc - start:0.4f} seconds")
-
+    timming_data["wait_for_page"] = toc - start
+    
     rating_details = {}
     #print("Page URL:", browser_driver.current_url) 
     #print("Page Title:", browser_driver.title)
@@ -52,17 +53,12 @@ def extract_rating_details(browser_driver, url, rate_limit=0):
     extract_rating(browser_driver, rating_details)
     extract_user_ratings(browser_driver, rating_details)
 
-    toc = time.perf_counter()
-    print(f"\tExtract page data {toc - start:0.4f} seconds")    
-
     rating_details["updated"] = time.strftime("%Y-%m-%d %H:%M:%S")
 
-    sleep_for = rate_limit - (toc - start)
-    if sleep_for > 0:
-        print(f"\tSleeping for {sleep_for:0.4f} seconds")
-        time.sleep(sleep_for)
+    toc = time.perf_counter()
+    timming_data["extract_data"] = toc - start
 
-    return rating_details
+    return rating_details, timming_data
 
 
 def extract_rating(browser_driver, rating_details):
