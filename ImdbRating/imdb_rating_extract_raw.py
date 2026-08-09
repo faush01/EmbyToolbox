@@ -5,7 +5,7 @@ import os
 import sqlite3
 import time
 from contextlib import closing
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -21,22 +21,56 @@ DATASET_HEADERS = {
 }
 EMBY_ITEMS_PATH = "emby_items.tsv"
 SQLITE_STORE_PATH = "imdb_ratings.db"
-CACHE_MAX_AGE = timedelta(hours=18)
 
 
-def download_dataset(dataset_path=DATASET_PATH, session=None):
+def _metadata_path(dataset_path):
+    return dataset_path.with_suffix(dataset_path.suffix + ".metadata.json")
+
+
+def _load_metadata(dataset_path):
+    metadata_path = _metadata_path(dataset_path)
+    if not metadata_path.exists():
+        return {}
+    try:
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _response_metadata(response):
+    return {
+        "etag": response.headers.get("ETag"),
+        "last_modified": response.headers.get("Last-Modified"),
+        "content_length": response.headers.get("Content-Length"),
+        "run_date": response.headers.get("x-amz-meta-run-date"),
+    }
+
+
+def _save_metadata(dataset_path, metadata):
+    metadata_path = _metadata_path(dataset_path)
+    temporary_path = metadata_path.with_suffix(metadata_path.suffix + ".tmp")
+    try:
+        temporary_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+        os.replace(temporary_path, metadata_path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
+def download_dataset(dataset_path=DATASET_PATH):
     dataset_path = Path(dataset_path)
-    if dataset_path.exists():
-        modified = datetime.fromtimestamp(dataset_path.stat().st_mtime, timezone.utc)
-        if datetime.now(timezone.utc) - modified < CACHE_MAX_AGE:
-            return False
-
     dataset_path.parent.mkdir(parents=True, exist_ok=True)
     temporary_path = dataset_path.with_suffix(dataset_path.suffix + ".tmp")
-    http = session or requests
+
+    if dataset_path.exists():
+        with requests.head(DATASET_URL, headers=DATASET_HEADERS, timeout=30) as response:
+            response.raise_for_status()
+            remote_metadata = _response_metadata(response)
+        local_metadata = _load_metadata(dataset_path)
+        if remote_metadata["etag"] and remote_metadata["etag"] == local_metadata.get("etag"):
+            return False
 
     try:
-        with http.get(
+        with requests.get(
             DATASET_URL,
             headers=DATASET_HEADERS,
             stream=True,
@@ -47,7 +81,9 @@ def download_dataset(dataset_path=DATASET_PATH, session=None):
                 for chunk in response.iter_content(chunk_size=1024 * 1024):
                     if chunk:
                         output.write(chunk)
+            downloaded_metadata = _response_metadata(response)
         os.replace(temporary_path, dataset_path)
+        _save_metadata(dataset_path, downloaded_metadata)
         return True
     finally:
         temporary_path.unlink(missing_ok=True)
